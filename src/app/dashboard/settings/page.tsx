@@ -171,67 +171,114 @@ export default function SettingsPage() {
                 </TabsContent>
 
                 <TabsContent value="billing" className="space-y-4">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Subscription Plan</CardTitle>
+                    <Card className="border-border/50 shadow-sm">
+                        <CardHeader className="pb-4">
+                            <CardTitle className="text-xl">Subscription Plan</CardTitle>
                             <CardDescription>
-                                View and manage your current subscription plan.
+                                View your current tier and professional entitlements.
                             </CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-6">
-                            <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border">
-                                <div className="space-y-1">
-                                    <div className="flex items-center gap-2">
-                                        <p className="font-semibold text-lg capitalize">{profile?.plan} Plan</p>
-                                        <Badge variant={profile?.subscription_status === 'active' ? 'default' : 'destructive'} className="bg-green-100 text-green-800 border-green-200">
-                                            {profile?.subscription_status}
-                                        </Badge>
+                        <CardContent className="space-y-8">
+                            {/* Current Plan Hero */}
+                            <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-6 bg-primary/5 rounded-xl border border-primary/20 gap-6">
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-primary/10 rounded-lg">
+                                            <CreditCard className="h-6 w-6 text-primary" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-2xl tracking-tight uppercase italic text-primary">
+                                                {profile?.plan ? SubscriptionService.getPlanLimits(profile.plan).name : 'Free'} Plan
+                                            </h3>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20 text-[10px] font-bold uppercase tracking-wider">
+                                                    {profile?.subscription_status || 'Active'}
+                                                </Badge>
+                                                <span className="text-xs text-muted-foreground">Premium Account</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <p className="text-sm text-muted-foreground">
-                                        {profile?.plan === 'free'
-                                            ? "You are currently on the free plan with limited features."
-                                            : "You are currently on a premium plan with full access."}
-                                    </p>
                                 </div>
-                                <Button asChild variant="outline">
-                                    <Link href="/pricing">Change Plan</Link>
+                                <Button asChild variant="default" className="shadow-lg shadow-primary/20 group">
+                                    <Link href="/pricing" className="flex items-center gap-2">
+                                        Upgrade My Credentials
+                                        <SettingsIcon className="h-4 w-4 group-hover:rotate-90 transition-transform" />
+                                    </Link>
                                 </Button>
                             </div>
 
-                            <div className="space-y-4">
-                                <h4 className="font-medium text-sm">Plan Limits Usage</h4>
-                                <div className="grid gap-4 md:grid-cols-2">
-                                    {profile?.plan && (
-                                        <>
-                                            <div className="p-4 border rounded-lg space-y-2">
-                                                <div className="flex justify-between text-sm">
-                                                    <span>Cases</span>
-                                                    <span className="text-muted-foreground">Limit: {SubscriptionService.getPlanLimits(profile.plan).cases}</span>
+                            <Separator className="opacity-50" />
+
+                            <div className="grid md:grid-cols-2 gap-12">
+                                {/* Entitlements List */}
+                                <div className="space-y-6">
+                                    <div className="space-y-1">
+                                        <h4 className="font-bold text-sm uppercase tracking-widest text-muted-foreground">Your Plan Entitlements</h4>
+                                        <p className="text-xs text-muted-foreground">Professional features included in your current tier.</p>
+                                    </div>
+                                    <ul className="grid gap-3">
+                                        {profile?.plan && SubscriptionService.getPlanLimits(profile.plan).features.map((feature, idx) => (
+                                            <li key={idx} className="flex items-center gap-3 text-sm font-medium">
+                                                <div className="flex-none p-0.5 bg-primary/20 rounded-full">
+                                                    <Loader2 className="h-3.5 w-3.5 text-primary" />
                                                 </div>
-                                                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                                                    <div
-                                                        className="h-full bg-primary"
-                                                        style={{ width: `${Math.min(100, (3 / SubscriptionService.getPlanLimits(profile.plan).cases) * 100)}%` }}
-                                                    />
+                                                {feature}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                {/* Plan Usage Limits */}
+                                <div className="space-y-6">
+                                    <div className="space-y-1">
+                                        <h4 className="font-bold text-sm uppercase tracking-widest text-muted-foreground">Resource Utilization</h4>
+                                        <p className="text-xs text-muted-foreground">Monitoring your institutional resource consumption.</p>
+                                    </div>
+                                    <div className="space-y-6">
+                                        {profile?.plan && (
+                                            <>
+                                                <div className="space-y-3">
+                                                    <div className="flex justify-between text-sm">
+                                                        <span className="font-semibold">Case Capacity</span>
+                                                        <span className="text-muted-foreground font-mono">
+                                                            {SubscriptionService.getPlanLimits(profile.plan).cases === Infinity ? "Unlimited" : `Limit: ${SubscriptionService.getPlanLimits(profile.plan).cases}`}
+                                                        </span>
+                                                    </div>
+                                                    <div className="h-3 bg-muted rounded-full overflow-hidden border border-border/50">
+                                                        <div
+                                                            className="h-full bg-primary transition-all duration-1000 ease-out"
+                                                            style={{ width: `${SubscriptionService.getPlanLimits(profile.plan).cases === Infinity ? 0 : Math.min(100, (3 / SubscriptionService.getPlanLimits(profile.plan).cases) * 100)}%` }}
+                                                        />
+                                                    </div>
+                                                    <p className="text-[10px] text-muted-foreground italic">Approx. 3 cases currently active in registry.</p>
                                                 </div>
-                                            </div>
-                                            <div className="p-4 border rounded-lg space-y-2">
-                                                <div className="flex justify-between text-sm">
-                                                    <span>Clients</span>
-                                                    <span className="text-muted-foreground">Limit: {SubscriptionService.getPlanLimits(profile.plan).clients}</span>
+
+                                                <div className="space-y-3">
+                                                    <div className="flex justify-between text-sm">
+                                                        <span className="font-semibold">Client Database</span>
+                                                        <span className="text-muted-foreground font-mono">
+                                                            {SubscriptionService.getPlanLimits(profile.plan).clients === Infinity ? "Unlimited" : `Limit: ${SubscriptionService.getPlanLimits(profile.plan).clients}`}
+                                                        </span>
+                                                    </div>
+                                                    <div className="h-3 bg-muted rounded-full overflow-hidden border border-border/50">
+                                                        <div
+                                                            className="h-full bg-primary transition-all duration-1000 ease-out"
+                                                            style={{ width: `${SubscriptionService.getPlanLimits(profile.plan).clients === Infinity ? 0 : Math.min(100, (2 / SubscriptionService.getPlanLimits(profile.plan).clients) * 100)}%` }}
+                                                        />
+                                                    </div>
+                                                    <p className="text-[10px] text-muted-foreground italic">Approx. 2 clients recorded in database.</p>
                                                 </div>
-                                                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                                                    <div
-                                                        className="h-full bg-primary"
-                                                        style={{ width: `${Math.min(100, (2 / SubscriptionService.getPlanLimits(profile.plan).clients) * 100)}%` }}
-                                                    />
-                                                </div>
-                                            </div>
-                                        </>
-                                    )}
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </CardContent>
+                        <CardFooter className="bg-muted/30 border-t p-4">
+                            <p className="text-[11px] text-muted-foreground">
+                                Need more resources? <Link href="/pricing" className="text-primary font-bold hover:underline">View architectural scaling options</Link> or contact your account executive.
+                            </p>
+                        </CardFooter>
                     </Card>
                 </TabsContent>
 

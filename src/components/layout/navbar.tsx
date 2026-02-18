@@ -37,12 +37,13 @@ export function Navbar() {
     }
 
     return (
-        <div className="flex items-center p-4 border-b h-16 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="flex items-center px-10 border-b border-border h-20 bg-background/40 backdrop-blur-2xl sticky top-0 z-50 selection:bg-primary/30">
+            <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
             <MobileSidebar />
-            <div className="ml-4 flex-1">
+            <div className="flex-1">
                 <Breadcrumb />
             </div>
-            <div className="flex w-full justify-end items-center gap-4">
+            <div className="flex w-full justify-end items-center gap-8">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="relative h-10 w-10 rounded-full">

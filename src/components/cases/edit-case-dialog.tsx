@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
-import { useSearchParams } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { toast } from "sonner"
-import { Plus } from "lucide-react"
+import { Edit } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -36,94 +35,56 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { CaseService } from "@/services/case-service"
 import { ClientService } from "@/services/client-service"
-import { SubscriptionService } from "@/services/subscription-service"
+import { CaseWithClient } from "@/types/case"
 import { Client } from "@/types/client"
-import { Profile } from "@/types/profile"
-import Link from "next/link"
-import { AlertCircle } from "lucide-react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 const formSchema = z.object({
     title: z.string().min(2, "Title must be at least 2 characters"),
     description: z.string().optional(),
     status: z.enum(['open', 'closed', 'pending']),
-    serviceType: z.string().min(1, "Please select a legal service"),
-    dueDate: z.string().optional(),
+    clientId: z.string().min(1, "Please select a client"),
+    dueDate: z.string().optional().nullable(),
 })
 
-const legalServices = [
-    "Corporate & Commercial Law",
-    "Litigation & Dispute Resolution",
-    "Property & Conveyancing",
-    "Intellectual Property",
-    "Family & Personal Law",
-    "Employment & Labour Law",
-    "Banking & Finance Law",
-    "Arbitration & Mediation",
-    "Tax & Regulatory Advisory",
-    "Company Secretarial Services"
-]
-
-interface AddCaseDialogProps {
-    onCaseAdded: () => void
+interface EditCaseDialogProps {
+    caseData: CaseWithClient
+    onCaseUpdated: () => void
 }
 
-export function AddCaseDialog({ onCaseAdded }: AddCaseDialogProps) {
+export function EditCaseDialog({ caseData, onCaseUpdated }: EditCaseDialogProps) {
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
     const [clients, setClients] = useState<Client[]>([])
-    const [profile, setProfile] = useState<Profile | null>(null)
-    const [caseCount, setCaseCount] = useState(0)
-    const [isAtLimit, setIsAtLimit] = useState(false)
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            title: "",
-            description: "",
-            status: "open",
-            serviceType: "",
-            dueDate: "",
+            title: caseData.title,
+            description: caseData.description || "",
+            status: caseData.status as 'open' | 'closed' | 'pending',
+            clientId: caseData.client_id || "",
+            dueDate: caseData.due_date ? new Date(caseData.due_date).toISOString().split('T')[0] : "",
         },
     })
 
-
     useEffect(() => {
-        async function fetchData() {
-            setLoading(true)
-            const [clientsRes, profileRes, countRes] = await Promise.all([
-                ClientService.getAll(),
-                SubscriptionService.getCurrentProfile(),
-                CaseService.getCount()
-            ])
-
-            setClients(clientsRes.data || [])
-            setProfile(profileRes.data)
-
-            // Fix for count property being missing in error case
-            const count = (countRes as any).count || 0
-            setCaseCount(count)
-
-            if (profileRes.data) {
-                const limits = SubscriptionService.getPlanLimits(profileRes.data.plan)
-                setIsAtLimit(count >= limits.cases)
-            }
-            setLoading(false)
+        async function fetchClients() {
+            const { data } = await ClientService.getAll()
+            setClients(data || [])
         }
         if (open) {
-            fetchData()
+            fetchClients()
         }
     }, [open])
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setLoading(true)
         try {
-            const { error } = await CaseService.create({
+            const { error } = await CaseService.update(caseData.id, {
                 title: values.title,
                 description: values.description || null,
                 status: values.status,
-                client_id: null,
-                service_type: values.serviceType,
+                client_id: values.clientId,
                 due_date: values.dueDate || null,
             })
 
@@ -131,12 +92,11 @@ export function AddCaseDialog({ onCaseAdded }: AddCaseDialogProps) {
                 throw error
             }
 
-            toast.success("Case added successfully")
+            toast.success("Case updated successfully")
             setOpen(false)
-            form.reset()
-            onCaseAdded()
+            onCaseUpdated()
         } catch (error: any) {
-            toast.error(error.message || "Failed to add case")
+            toast.error(error.message || "Failed to update case")
         } finally {
             setLoading(false)
         }
@@ -145,34 +105,17 @@ export function AddCaseDialog({ onCaseAdded }: AddCaseDialogProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button>
-                    <Plus className="mr-2 h-4 w-4" /> Add Case
+                <Button variant="outline" size="sm">
+                    <Edit className="mr-2 h-4 w-4" /> Edit
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Add New Case</DialogTitle>
+                    <DialogTitle>Edit Case</DialogTitle>
                     <DialogDescription>
-                        {isAtLimit ? (
-                            "You have reached the maximum number of cases for your plan."
-                        ) : (
-                            "Enter the details of the new case here. Click save when you're done."
-                        )}
+                        Modify the case details and click save when you&apos;re done.
                     </DialogDescription>
                 </DialogHeader>
-
-                {isAtLimit && (
-                    <Alert variant="destructive" className="mb-4">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertTitle>Limit Reached</AlertTitle>
-                        <AlertDescription className="flex flex-col gap-2">
-                            <span>Your current {profile?.plan} plan is limited to {SubscriptionService.getPlanLimits(profile?.plan || 'free').cases} cases.</span>
-                            <Link href="/pricing" onClick={() => setOpen(false)} className="underline font-bold">
-                                Upgrade to Pro for more cases
-                            </Link>
-                        </AlertDescription>
-                    </Alert>
-                )}
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -183,7 +126,7 @@ export function AddCaseDialog({ onCaseAdded }: AddCaseDialogProps) {
                                 <FormItem>
                                     <FormLabel>Title</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Smith v. Jones" {...field} />
+                                        <Input placeholder="Case Title" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -226,20 +169,20 @@ export function AddCaseDialog({ onCaseAdded }: AddCaseDialogProps) {
                         />
                         <FormField
                             control={form.control}
-                            name="serviceType"
+                            name="clientId"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Legal Services</FormLabel>
+                                    <FormLabel>Client</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select service category" />
+                                                <SelectValue placeholder="Select client" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {legalServices.map((service) => (
-                                                <SelectItem key={service} value={service}>
-                                                    {service}
+                                            {clients.map((client) => (
+                                                <SelectItem key={client.id} value={client.id}>
+                                                    {client.name}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -255,14 +198,14 @@ export function AddCaseDialog({ onCaseAdded }: AddCaseDialogProps) {
                                 <FormItem>
                                     <FormLabel>Due Date</FormLabel>
                                     <FormControl>
-                                        <Input type="date" {...field} />
+                                        <Input type="date" {...field} value={field.value || ""} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit" className="w-full" disabled={loading || isAtLimit}>
-                            {loading ? "Saving..." : isAtLimit ? "Plan Limit Reached" : "Save Case"}
+                        <Button type="submit" className="w-full" disabled={loading}>
+                            {loading ? "Updating..." : "Save Changes"}
                         </Button>
                     </form>
                 </Form>

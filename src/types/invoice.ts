@@ -12,6 +12,7 @@ export interface Invoice {
     total: number
     notes: string | null
     logo_url: string | null
+    user_id?: string
     created_at: string
     updated_at: string
 }
@@ -23,6 +24,7 @@ export interface InvoiceItem {
     quantity: number
     unit_price: number
     amount: number
+    user_id?: string
     created_at: string
 }
 

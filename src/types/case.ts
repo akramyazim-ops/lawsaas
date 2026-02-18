@@ -4,7 +4,9 @@ export interface Case {
     description: string | null
     status: 'open' | 'closed' | 'pending'
     client_id: string | null
+    service_type: string | null
     due_date: string | null
+    user_id?: string
     created_at: string
     updated_at: string
 }

@@ -17,38 +17,55 @@ import { SubscriptionService } from "@/services/subscription-service"
 import { Profile } from "@/types/profile"
 import { useEffect, useState } from "react"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { motion } from "framer-motion"
 
-const routes = [
+const sections = [
     {
-        label: "Dashboard",
-        icon: LayoutDashboard,
-        href: "/dashboard",
+        title: "Practice",
+        routes: [
+            {
+                label: "Dashboard",
+                icon: LayoutDashboard,
+                href: "/dashboard",
+            },
+            {
+                label: "Cases",
+                icon: Briefcase,
+                href: "/dashboard/cases",
+            },
+            {
+                label: "Clients",
+                icon: Users,
+                href: "/dashboard/clients",
+            },
+        ]
     },
     {
-        label: "Cases",
-        icon: Briefcase,
-        href: "/dashboard/cases",
+        title: "Operations",
+        routes: [
+            {
+                label: "Documents",
+                icon: FileText,
+                href: "/dashboard/documents",
+            },
+            {
+                label: "Billing",
+                icon: CreditCard,
+                href: "/dashboard/billing",
+            },
+        ]
     },
     {
-        label: "Clients",
-        icon: Users,
-        href: "/dashboard/clients",
-    },
-    {
-        label: "Documents",
-        icon: FileText,
-        href: "/dashboard/documents",
-    },
-    {
-        label: "Billing",
-        icon: CreditCard,
-        href: "/dashboard/billing",
-    },
-    {
-        label: "Settings",
-        icon: Settings,
-        href: "/dashboard/settings",
-    },
+        title: "System",
+        routes: [
+            {
+                label: "Settings",
+                icon: Settings,
+                href: "/dashboard/settings",
+            },
+        ]
+    }
 ]
 
 export function Sidebar() {
@@ -64,56 +81,94 @@ export function Sidebar() {
     }, [])
 
     return (
-        <div className="space-y-4 py-4 flex flex-col h-full bg-sidebar text-sidebar-foreground border-r border-sidebar-border shadow-sm">
-            <div className="px-3 py-2 flex-1">
-                <Link href="/dashboard" className="flex items-center pl-3 mb-10">
-                    <Shield className="h-8 w-8 text-primary mr-2" />
-                    <h1 className="text-2xl font-bold text-primary">
-                        LegalFlow
-                    </h1>
+        <div className="flex flex-col h-full bg-sidebar border-r border-sidebar-border selection:bg-primary/30 relative">
+            <div className="absolute inset-0 grain opacity-[0.03] pointer-events-none"></div>
+
+            <div className="px-6 py-10 flex-1 relative z-10">
+                <Link href="/dashboard" className="flex items-center mb-16 group">
+                    <div className="h-10 w-10 bg-primary flex items-center justify-center transition-transform duration-500 group-hover:rotate-90">
+                        <Shield className="h-6 w-6 text-primary-foreground" />
+                    </div>
+                    <div className="ml-4 flex flex-col">
+                        <h1 className="text-2xl font-black tracking-tighter text-white uppercase italic leading-none">
+                            LegalFlow
+                        </h1>
+                        <span className="text-[8px] font-black tracking-[0.4em] text-primary uppercase mt-1">
+                            Pioneer Grade
+                        </span>
+                    </div>
                 </Link>
-                <div className="space-y-1">
-                    {routes.map((route) => (
-                        <Link
-                            key={route.href}
-                            href={route.href}
-                            className={cn(
-                                "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer rounded-lg transition-all duration-200",
-                                pathname === route.href
-                                    ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
-                                    : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
-                            )}
-                        >
-                            <div className="flex items-center flex-1">
-                                <route.icon className={cn("h-5 w-5 mr-3 transition-colors", pathname === route.href ? "text-primary" : "text-muted-foreground group-hover:text-primary")} />
-                                {route.label}
+
+                <div className="space-y-8">
+                    {sections.map((section) => (
+                        <div key={section.title} className="space-y-3">
+                            <h3 className="px-4 text-[10px] font-black uppercase tracking-[0.3em] text-primary opacity-60">
+                                {section.title}
+                            </h3>
+                            <div className="space-y-1">
+                                {section.routes.map((route) => {
+                                    const isActive = pathname === route.href
+                                    return (
+                                        <Link
+                                            key={route.href}
+                                            href={route.href}
+                                            className={cn(
+                                                "text-[11px] group flex p-4 w-full justify-start font-black uppercase tracking-[0.15em] cursor-pointer transition-all duration-300 relative overflow-hidden",
+                                                isActive
+                                                    ? "text-primary border border-primary/20 bg-primary/5"
+                                                    : "text-muted-foreground hover:text-white hover:bg-white/5"
+                                            )}
+                                        >
+                                            {isActive && (
+                                                <motion.div
+                                                    layoutId="active-pill"
+                                                    className="absolute left-0 top-0 bottom-0 w-0.5 bg-primary gold-glow"
+                                                />
+                                            )}
+                                            <div className="flex items-center flex-1">
+                                                <route.icon className={cn(
+                                                    "h-3.5 w-3.5 mr-4 transition-colors",
+                                                    isActive ? "text-primary" : "text-muted-foreground group-hover:text-white"
+                                                )} />
+                                                {route.label}
+                                            </div>
+                                        </Link>
+                                    )
+                                })}
                             </div>
-                        </Link>
+                        </div>
                     ))}
                 </div>
             </div>
 
             {profile && (
-                <div className="mx-4 mb-4">
-                    <div className="bg-sidebar-accent/50 rounded-xl p-4 border border-sidebar-border/50">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Zap className="h-4 w-4 text-primary fill-primary/20" />
-                            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                                Current Plan
+                <div className="p-6 relative z-10">
+                    <div className="architectural-border bg-card p-6 group cursor-default">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2 bg-primary/10 rounded-full">
+                                <Zap className="h-3 w-3 text-primary" />
+                            </div>
+                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary opacity-60">
+                                System Status
                             </span>
                         </div>
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-sm font-bold capitalize">{profile.plan}</span>
-                            <Badge variant="outline" className="text-[10px] h-4 px-1.5 border-primary/20 bg-primary/5 text-primary">
-                                {profile.subscription_status}
-                            </Badge>
+                        <div className="flex flex-col gap-1 mb-6">
+                            <span className="text-sm font-black uppercase tracking-tighter text-white italic">
+                                Plan: {profile.plan}
+                            </span>
+                            <span className="text-[10px] font-bold text-primary uppercase tracking-widest leading-none">
+                                {profile.subscription_status} access
+                            </span>
                         </div>
-                        <Link
-                            href="/pricing"
-                            className="block w-full text-center text-xs font-medium py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors shadow-sm"
+                        <Button
+                            asChild
+                            variant="outline"
+                            className="w-full text-[10px] font-black uppercase tracking-[0.2em] h-12 border-primary/20 hover:bg-primary hover:text-primary-foreground transition-all rounded-none"
                         >
-                            {profile.plan === 'enterprise' ? 'Manage' : 'Upgrade Plan'}
-                        </Link>
+                            <Link href="/pricing">
+                                {profile.plan === 'pro_firm' ? 'Enterprise Dashboard' : 'Elevate Experience'}
+                            </Link>
+                        </Button>
                     </div>
                 </div>
             )}

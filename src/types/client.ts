@@ -4,6 +4,7 @@ export interface Client {
     email: string | null
     phone: string | null
     address: string | null
+    user_id?: string
     created_at: string
     updated_at: string
 }

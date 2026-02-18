@@ -36,23 +36,72 @@ export const SubscriptionService = {
                 cases: 3,
                 documents: 20,
                 invoices: 5,
-                features: ["Basic Client Mgmt", "Basic Case Mgmt", "Email Support"],
+                name: "Free Trial",
+                features: [
+                    "Basic Client Management",
+                    "Basic Case Tracking",
+                    "Limited Document Storage",
+                    "Community Support"
+                ],
             },
-            pro: {
+            starter: {
+                clients: 10,
+                cases: 10,
+                documents: 1000,
+                invoices: 50,
+                name: "Starter",
+                features: [
+                    "Client & matter management",
+                    "Basic document automation",
+                    "1,000 documents/month",
+                    "Basic client portal",
+                    "Task & deadline reminders",
+                    "Email support",
+                    "Secure cloud storage (limited)"
+                ],
+            },
+            growth: {
                 clients: 50,
-                cases: 50,
-                documents: 500,
-                invoices: 100,
-                features: ["Advanced Billing", "Document Management", "Priority Support"],
+                cases: 100,
+                documents: Infinity,
+                invoices: Infinity,
+                name: "Growth",
+                features: [
+                    "Everything in Starter, plus:",
+                    "Unlimited document automation",
+                    "Custom template builder",
+                    "Time tracking & billing dashboard",
+                    "Client portal with e-signature",
+                    "Workflow automation",
+                    "5 user accounts included",
+                    "Priority support"
+                ],
             },
-            enterprise: {
+            pro_firm: {
                 clients: Infinity,
                 cases: Infinity,
                 documents: Infinity,
                 invoices: Infinity,
-                features: ["Unlimited Everything", "Custom Branding", "Dedicated Account Manager"],
+                name: "Pro Firm",
+                features: [
+                    "Everything in Growth, plus:",
+                    "Unlimited users",
+                    "Advanced analytics & reporting",
+                    "Role-based permissions",
+                    "API & accounting integration",
+                    "Custom onboarding & training",
+                    "Dedicated account support",
+                    "Advanced security & audit trail"
+                ],
             }
         }
-        return limits[plan]
+        return (limits[plan as keyof typeof limits] || limits.free) as {
+            clients: number;
+            cases: number;
+            documents: number;
+            invoices: number;
+            name: string;
+            features: string[];
+        }
     }
 }
