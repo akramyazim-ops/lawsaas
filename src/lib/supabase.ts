@@ -1,12 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
 
-// We use direct access and provide a hard fallback to avoid any falsy values
-// during the Next.js build/prerendering phase.
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
+// Hardened environmental extraction for production build stability
+const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
+const rawKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()
 
-// Double check to ensure we are not passing an empty string
-const finalUrl = supabaseUrl.trim() === '' ? 'https://placeholder.supabase.co' : supabaseUrl
-const finalKey = supabaseKey.trim() === '' ? 'placeholder' : supabaseKey
+// Fallbacks for build-time safety (Next.js pre-rendering)
+const supabaseUrl = rawUrl && rawUrl.startsWith('http') ? rawUrl : 'https://placeholder.supabase.co'
+const supabaseKey = rawKey || 'placeholder-key'
 
-export const supabase = createClient(finalUrl, finalKey)
+export const supabase = createClient(supabaseUrl, supabaseKey)
