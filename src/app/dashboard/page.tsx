@@ -333,7 +333,7 @@ export default function DashboardPage() {
                             <TrendingUp className="h-4 w-4 text-primary opacity-60 animate-pulse" />
                         </div>
                         <p className="text-[11px] font-bold text-muted-foreground leading-relaxed italic pr-4">
-                            "System detected {stats.activeCases} active matters with high tactical momentum. Ensure all client registries are synchronized for the upcoming review."
+                            &quot;System detected {stats.activeCases} active matters with high tactical momentum. Ensure all client registries are synchronized for the upcoming review.&quot;
                         </p>
                     </div>
                 </motion.div>

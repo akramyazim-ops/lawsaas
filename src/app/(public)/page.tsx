@@ -125,7 +125,7 @@ export default function Home() {
                 <motion.div variants={itemVariants}>
                   <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-white">Built for <br /><span className="text-primary italic">Performance</span></h2>
                   <p className="mt-6 text-xl text-muted-foreground leading-relaxed max-w-xl">
-                    LegalFlow isn't just software. It's an operating system for elite firms that refuse to compromise on quality and efficiency.
+                    LegalFlow isn&apos;t just software. It&apos;s an operating system for elite firms that refuse to compromise on quality and efficiency.
                   </p>
                 </motion.div>
 

@@ -135,7 +135,7 @@ export default function BillingPage() {
                     <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/60">Financial Registry</span>
                     <h2 className="text-4xl font-black tracking-tighter text-foreground uppercase italic leading-none">Billing & Revenue</h2>
                     <p className="text-muted-foreground font-medium text-lg max-w-2xl">
-                        Monitor the firm's fiscal health and transaction history with pioneer-grade precision.
+                        Monitor the firm&apos;s fiscal health and transaction history with pioneer-grade precision.
                     </p>
                 </div>
                 <Button asChild className="h-14 px-8 font-black uppercase tracking-[0.2em] shadow-xl shadow-primary/10 rounded-none bg-primary text-black hover:bg-primary/90 transition-all active:scale-95">

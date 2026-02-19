@@ -50,7 +50,9 @@ const formSchema = z.object({
     })).min(1, "At least one item is required"),
 })
 
-export default function NewInvoicePage() {
+import { Suspense } from "react"
+
+function NewInvoiceContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const defaultClientId = searchParams.get('clientId') || ""
@@ -122,9 +124,6 @@ export default function NewInvoicePage() {
                             // Ensure dates are fresh if not provided
                             issue_date: parsed.issue_date || new Date().toISOString().split('T')[0],
                         })
-                        if (parsed.items) {
-                            // Re-sync field array handled by form.reset
-                        }
                         toast.info("Draft restored from local registry")
                     } catch (e) {
                         console.error("Failed to restore draft")
@@ -532,5 +531,21 @@ export default function NewInvoicePage() {
                 </form>
             </Form>
         </div>
+    )
+}
+
+export default function NewInvoicePage() {
+    return (
+        <Suspense fallback={
+            <div className="p-8 space-y-10 animate-pulse">
+                <div className="h-20 bg-muted/20 w-1/3" />
+                <div className="grid gap-6 md:grid-cols-2">
+                    <div className="h-64 bg-muted/10" />
+                    <div className="h-64 bg-muted/10" />
+                </div>
+            </div>
+        }>
+            <NewInvoiceContent />
+        </Suspense>
     )
 }
